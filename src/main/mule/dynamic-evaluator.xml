@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e7b3fe16-1081-4fa2-bff5-501b7fe4da16" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<flow name="dynamic-evaluatorFlow" doc:id="332d8d95-5919-4eb7-8428-ffeb6c7ef0d7" >
+		<http:listener doc:name="Listener" doc:id="a4d19b9b-1829-4c71-bd5e-9071c4600034" config-ref="HTTP_Listener_config" path="/de"/>
+		<set-variable value="#[attributes.queryParams.cust]" doc:name="Set Variable" doc:id="a2b36c32-e9d5-45a9-b0a0-10216923c4d2" variableName="Vcust"/>
+		<ee:transform doc:name="Transform Message" doc:id="2394e7a0-1adf-44af-bdd5-ad0a963a3cd8" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="vDWL" ><![CDATA[%dw 2.0
+output application/json
+var filepath = "DE/"++(vars.Vcust)++".dwl"
+---
+readUrl("classpath://" ++ filepath,"text/plain")]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:dynamic-evaluate doc:name="Dynamic Evaluate" doc:id="519a1add-17c5-4e51-bf39-8c45b6e2bce3" expression="#[vars.vDWL]"/>
+	</flow>
+</mule>
